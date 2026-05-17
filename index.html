@@ -55,6 +55,10 @@
                     <span class="nav-icon">🔑</span>
                     <span class="nav-label">Hashing</span>
                 </button>
+                <button class="nav-btn" data-section="bruteforce" id="nav-bruteforce">
+                    <span class="nav-icon">💥</span>
+                    <span class="nav-label">Brute Force</span>
+                </button>
                 <button class="nav-btn" data-section="history" id="nav-history">
                     <span class="nav-icon">📜</span>
                     <span class="nav-label">History</span>
@@ -298,6 +302,64 @@
             </div>
         </section>
 
+        <!-- ==================== BRUTE FORCE SECTION ==================== -->
+        <section id="section-bruteforce" class="section">
+            <div class="bf-header">
+                <h2>💥 Universal Brute-Force Decryption</h2>
+                <p class="bf-subtitle">Automatically try every cipher and key combination to crack unknown ciphertext</p>
+            </div>
+
+            <div class="bf-input-area">
+                <div class="panel-header">
+                    <h3><span class="header-dot bf"></span>Ciphertext Input</h3>
+                    <span class="char-count" id="bf-char-count">0 chars</span>
+                </div>
+                <textarea id="bf-input" placeholder="Paste your unknown ciphertext here..." spellcheck="false"></textarea>
+            </div>
+
+            <div class="bf-controls">
+                <div class="bf-filters">
+                    <span class="bf-filter-label">Attack Categories:</span>
+                    <label class="bf-checkbox"><input type="checkbox" id="bf-filter-classic" checked><span class="bf-check-icon">⚔️</span> Classic</label>
+                    <label class="bf-checkbox"><input type="checkbox" id="bf-filter-encoding" checked><span class="bf-check-icon">📦</span> Encoding</label>
+                    <label class="bf-checkbox"><input type="checkbox" id="bf-filter-modern" checked><span class="bf-check-icon">🛡️</span> Modern</label>
+                    <label class="bf-checkbox"><input type="checkbox" id="bf-filter-esoteric" checked><span class="bf-check-icon">🌀</span> Esoteric</label>
+                </div>
+                <div class="bf-actions">
+                    <button id="bf-launch-btn" class="process-btn bf-launch">
+                        <span class="process-text">LAUNCH ATTACK</span>
+                        <span class="process-icon">💥</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bf-progress-container" id="bf-progress-container" style="display:none">
+                <div class="bf-progress-info">
+                    <span class="bf-progress-label" id="bf-progress-label">Initializing...</span>
+                    <span class="bf-progress-percent" id="bf-progress-percent">0%</span>
+                </div>
+                <div class="bf-progress-track">
+                    <div class="bf-progress-fill" id="bf-progress"></div>
+                </div>
+            </div>
+
+            <div class="bf-results-header" id="bf-results-header" style="display:none">
+                <span class="bf-results-count" id="bf-results-count">0 candidates</span>
+                <div class="bf-sort-toggle">
+                    <span class="bf-sort-label">Sort by:</span>
+                    <button class="bf-sort-btn active" id="bf-sort-score" data-sort="score">Score</button>
+                    <button class="bf-sort-btn" id="bf-sort-cipher" data-sort="cipher">Cipher</button>
+                </div>
+            </div>
+
+            <div class="bf-results" id="bf-results">
+                <div class="history-empty">
+                    <span class="empty-icon">🎯</span>
+                    <p>Paste ciphertext above and launch an attack to find possible decryptions.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- ==================== HISTORY SECTION ==================== -->
         <section id="section-history" class="section">
             <div class="history-header">
@@ -323,6 +385,7 @@
     <script src="ciphers.js"></script>
     <script src="analysis.js"></script>
     <script src="hashing.js"></script>
+    <script src="bruteforce.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

@@ -429,6 +429,150 @@
     const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
   }
 
+  // ===== BRUTE FORCE HANDLERS =====
+  let bfResults = [];
+  let bfOriginalInput = '';
+  let bfSortMode = 'score';
+
+  // Char count for bf input
+  const bfInput = $('bf-input');
+  if (bfInput) {
+    bfInput.addEventListener('input', () => {
+      $('bf-char-count').textContent = bfInput.value.length + ' chars';
+    });
+  }
+
+  // Launch attack
+  $('bf-launch-btn')?.addEventListener('click', async () => {
+    const text = $('bf-input').value.trim();
+    if (!text) { showToast('Enter ciphertext first', 'error'); return; }
+    bfOriginalInput = text;
+
+    // Read category filters
+    const filter = {
+      classic: $('bf-filter-classic').checked,
+      encoding: $('bf-filter-encoding').checked,
+      modern: $('bf-filter-modern').checked,
+      esoteric: $('bf-filter-esoteric').checked,
+    };
+
+    if (!filter.classic && !filter.encoding && !filter.modern && !filter.esoteric) {
+      showToast('Select at least one category', 'error');
+      return;
+    }
+
+    // Reset UI
+    $('bf-progress-container').style.display = 'block';
+    $('bf-progress').style.width = '0%';
+    $('bf-progress-percent').textContent = '0%';
+    $('bf-progress-label').textContent = 'Initializing...';
+    $('bf-results-header').style.display = 'none';
+    $('bf-results').innerHTML = '<div class="history-empty"><span class="empty-icon">⏳</span><p>Running attack...</p></div>';
+
+    // Disable launch button
+    const launchBtn = $('bf-launch-btn');
+    launchBtn.disabled = true;
+    launchBtn.style.opacity = '0.5';
+
+    try {
+      bfResults = await BruteForceEngine.runAll(text, filter, (percent, cipherName) => {
+        $('bf-progress').style.width = percent + '%';
+        $('bf-progress-percent').textContent = percent + '%';
+        $('bf-progress-label').textContent = 'Attacking: ' + cipherName;
+      });
+
+      // Sort by score descending
+      bfSortMode = 'score';
+      $('bf-sort-score').classList.add('active');
+      $('bf-sort-cipher').classList.remove('active');
+      bfResults.sort((a, b) => b.score - a.score);
+
+      renderBfResults();
+      showToast(`Attack complete — ${bfResults.length} candidates found`, 'success');
+    } catch (e) {
+      showToast('Attack failed: ' + e.message, 'error');
+    }
+
+    // Re-enable
+    launchBtn.disabled = false;
+    launchBtn.style.opacity = '1';
+  });
+
+  // Sort toggle
+  $('bf-sort-score')?.addEventListener('click', () => {
+    bfSortMode = 'score';
+    $('bf-sort-score').classList.add('active');
+    $('bf-sort-cipher').classList.remove('active');
+    bfResults.sort((a, b) => b.score - a.score);
+    renderBfResults();
+  });
+  $('bf-sort-cipher')?.addEventListener('click', () => {
+    bfSortMode = 'cipher';
+    $('bf-sort-cipher').classList.add('active');
+    $('bf-sort-score').classList.remove('active');
+    bfResults.sort((a, b) => a.algoName.localeCompare(b.algoName) || b.score - a.score);
+    renderBfResults();
+  });
+
+  function renderBfResults() {
+    const container = $('bf-results');
+    const header = $('bf-results-header');
+
+    if (!bfResults.length) {
+      header.style.display = 'none';
+      container.innerHTML = '<div class="history-empty"><span class="empty-icon">🚫</span><p>No plausible decryptions found. The ciphertext may use an unknown key or unsupported algorithm.</p></div>';
+      return;
+    }
+
+    header.style.display = 'flex';
+    $('bf-results-count').textContent = bfResults.length + ' candidate' + (bfResults.length !== 1 ? 's' : '');
+
+    container.innerHTML = bfResults.map((r, i) => {
+      const scoreClass = r.score >= 20 ? 'high' : r.score >= 5 ? 'medium' : 'low';
+      const scoreLabel = r.score >= 20 ? 'HIGH' : r.score >= 5 ? 'MED' : 'LOW';
+      const preview = escapeHtml(r.decrypted.substring(0, 120)) + (r.decrypted.length > 120 ? '...' : '');
+      return `
+        <div class="bf-result-card score-${scoreClass}" data-index="${i}">
+          <div class="bf-card-top">
+            <div class="bf-card-cipher">
+              <span class="bf-card-name">${escapeHtml(r.algoName)}</span>
+              <span class="bf-card-id">${escapeHtml(r.algoId)}</span>
+            </div>
+            <div class="bf-card-badges">
+              <span class="bf-cat-badge ${r.category}">${r.category}</span>
+              <span class="bf-score-badge ${scoreClass}">${scoreLabel} ${r.score.toFixed(1)}</span>
+            </div>
+          </div>
+          <div class="bf-card-key">🔑 ${escapeHtml(r.key)}</div>
+          <div class="bf-card-preview">${preview}</div>
+          <div class="bf-card-bottom">
+            <button class="bf-use-btn" data-bf-index="${i}">Use This →</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Event-delegated "Use This" handler
+  $('bf-results')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.bf-use-btn');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.bfIndex);
+    const r = bfResults[idx];
+    if (!r) return;
+
+    inputText.value = bfOriginalInput;
+    outputText.value = r.decrypted;
+    updateCounts();
+
+    // Navigate to Ciphers tab
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    $('nav-cipher').classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    $('section-cipher').classList.add('active');
+
+    showToast('Loaded into Cipher workbench', 'success');
+  });
+
   // ===== INIT =====
   initMatrix();
   initParticles();
