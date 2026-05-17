@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DECIPHER | Ultimate Cryptanalysis Suite</title>
+    <meta name="description" content="DECIPHER - The ultimate decryption, encoding, and cryptanalysis tool. Supports 25+ cipher algorithms, frequency analysis, brute force attacks, and auto-detection.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Matrix Rain Canvas -->
+    <canvas id="matrix-rain"></canvas>
+    
+    <!-- Ambient Particles -->
+    <div id="particles"></div>
+
+    <!-- Header -->
+    <header id="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="22" stroke="url(#logoGrad)" stroke-width="2" fill="none"/>
+                        <circle cx="24" cy="24" r="16" stroke="url(#logoGrad)" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
+                        <circle cx="24" cy="24" r="8" fill="url(#logoGrad)" opacity="0.3"/>
+                        <path d="M24 6 L24 42 M6 24 L42 24 M11 11 L37 37 M37 11 L11 37" stroke="url(#logoGrad)" stroke-width="0.8" opacity="0.5"/>
+                        <text x="24" y="29" text-anchor="middle" fill="url(#logoGrad)" font-size="14" font-family="Orbitron" font-weight="700">D</text>
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0" y1="0" x2="48" y2="48">
+                                <stop offset="0%" stop-color="#00f0ff"/>
+                                <stop offset="50%" stop-color="#7b2ff7"/>
+                                <stop offset="100%" stop-color="#ff2d95"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>DECIPHER</h1>
+                    <span class="tagline">Ultimate Cryptanalysis Suite</span>
+                </div>
+            </div>
+            <nav class="header-nav">
+                <button class="nav-btn active" data-section="cipher" id="nav-cipher">
+                    <span class="nav-icon">🔐</span>
+                    <span class="nav-label">Ciphers</span>
+                </button>
+                <button class="nav-btn" data-section="analysis" id="nav-analysis">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Analysis</span>
+                </button>
+                <button class="nav-btn" data-section="hash" id="nav-hash">
+                    <span class="nav-icon">🔑</span>
+                    <span class="nav-label">Hashing</span>
+                </button>
+                <button class="nav-btn" data-section="history" id="nav-history">
+                    <span class="nav-icon">📜</span>
+                    <span class="nav-label">History</span>
+                </button>
+            </nav>
+            <div class="header-actions">
+                <button id="clear-all-btn" class="action-btn" title="Clear All">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+                </button>
+                <button id="theme-toggle" class="action-btn" title="Toggle Matrix Effect">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="app-main">
+        <!-- ==================== CIPHER SECTION ==================== -->
+        <section id="section-cipher" class="section active">
+            <!-- Cipher Category Selector -->
+            <div class="cipher-categories" id="cipher-categories">
+                <button class="cat-btn active" data-category="classic">
+                    <span class="cat-icon">⚔️</span>
+                    <span>Classic</span>
+                </button>
+                <button class="cat-btn" data-category="encoding">
+                    <span class="cat-icon">📦</span>
+                    <span>Encoding</span>
+                </button>
+                <button class="cat-btn" data-category="modern">
+                    <span class="cat-icon">🛡️</span>
+                    <span>Modern</span>
+                </button>
+                <button class="cat-btn" data-category="esoteric">
+                    <span class="cat-icon">🌀</span>
+                    <span>Esoteric</span>
+                </button>
+            </div>
+
+            <!-- Algorithm Selector -->
+            <div class="algorithm-bar" id="algorithm-bar">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Main Workbench -->
+            <div class="workbench">
+                <div class="workbench-panel input-panel">
+                    <div class="panel-header">
+                        <h3><span class="header-dot"></span>Input</h3>
+                        <div class="panel-actions">
+                            <button id="paste-btn" class="mini-btn" title="Paste from clipboard">📋</button>
+                            <button id="sample-btn" class="mini-btn" title="Load sample text">💡</button>
+                            <span class="char-count" id="input-char-count">0 chars</span>
+                        </div>
+                    </div>
+                    <textarea id="input-text" placeholder="Enter text to encrypt or decrypt..." spellcheck="false"></textarea>
+                </div>
+
+                <!-- Controls Strip -->
+                <div class="controls-strip">
+                    <div class="key-inputs" id="key-inputs">
+                        <!-- Dynamic key inputs populated by JS -->
+                    </div>
+                    <div class="direction-toggle">
+                        <button id="encrypt-btn" class="dir-btn active" title="Encrypt">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            <span>Encrypt</span>
+                        </button>
+                        <button id="decrypt-btn" class="dir-btn" title="Decrypt">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
+                            <span>Decrypt</span>
+                        </button>
+                    </div>
+                    <button id="process-btn" class="process-btn">
+                        <span class="process-text">PROCESS</span>
+                        <span class="process-icon">⚡</span>
+                    </button>
+                    <button id="swap-btn" class="swap-btn" title="Swap input/output">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"/></svg>
+                    </button>
+                </div>
+
+                <div class="workbench-panel output-panel">
+                    <div class="panel-header">
+                        <h3><span class="header-dot output"></span>Output</h3>
+                        <div class="panel-actions">
+                            <button id="copy-btn" class="mini-btn" title="Copy to clipboard">📋</button>
+                            <button id="download-btn" class="mini-btn" title="Download result">💾</button>
+                            <span class="char-count" id="output-char-count">0 chars</span>
+                        </div>
+                    </div>
+                    <textarea id="output-text" placeholder="Result will appear here..." readonly spellcheck="false"></textarea>
+                </div>
+            </div>
+
+            <!-- Algorithm Info Card -->
+            <div class="algo-info-card" id="algo-info-card">
+                <div class="info-header">
+                    <h4 id="algo-info-name">Caesar Cipher</h4>
+                    <span class="algo-badge" id="algo-info-badge">Classic</span>
+                </div>
+                <p id="algo-info-desc">A substitution cipher where each letter is shifted by a fixed number of positions in the alphabet.</p>
+                <div class="algo-meta">
+                    <span class="meta-tag" id="algo-info-security">🔓 Low Security</span>
+                    <span class="meta-tag" id="algo-info-type">📝 Substitution</span>
+                    <span class="meta-tag" id="algo-info-key">🔑 Shift Key</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ANALYSIS SECTION ==================== -->
+        <section id="section-analysis" class="section">
+            <div class="analysis-grid">
+                <!-- Frequency Analysis -->
+                <div class="analysis-card full-width" id="freq-analysis-card">
+                    <div class="card-header">
+                        <h3>📊 Frequency Analysis</h3>
+                        <button id="run-freq-btn" class="run-btn">Analyze</button>
+                    </div>
+                    <textarea id="freq-input" class="analysis-input" placeholder="Paste ciphertext here for frequency analysis..." spellcheck="false"></textarea>
+                    <div class="freq-results" id="freq-results">
+                        <div class="freq-chart" id="freq-chart"></div>
+                        <div class="freq-stats" id="freq-stats"></div>
+                    </div>
+                </div>
+
+                <!-- Brute Force Caesar -->
+                <div class="analysis-card" id="brute-caesar-card">
+                    <div class="card-header">
+                        <h3>💪 Brute Force Caesar</h3>
+                        <button id="run-brute-btn" class="run-btn">Attack</button>
+                    </div>
+                    <textarea id="brute-input" class="analysis-input" placeholder="Paste Caesar ciphertext to try all 25 shifts..." spellcheck="false"></textarea>
+                    <div class="brute-results" id="brute-results"></div>
+                </div>
+
+                <!-- Auto Detect -->
+                <div class="analysis-card" id="auto-detect-card">
+                    <div class="card-header">
+                        <h3>🔍 Auto-Detect Cipher</h3>
+                        <button id="run-detect-btn" class="run-btn">Detect</button>
+                    </div>
+                    <textarea id="detect-input" class="analysis-input" placeholder="Paste text to auto-detect encoding/cipher type..." spellcheck="false"></textarea>
+                    <div class="detect-results" id="detect-results"></div>
+                </div>
+
+                <!-- Index of Coincidence -->
+                <div class="analysis-card" id="ioc-card">
+                    <div class="card-header">
+                        <h3>📐 Index of Coincidence</h3>
+                        <button id="run-ioc-btn" class="run-btn">Calculate</button>
+                    </div>
+                    <textarea id="ioc-input" class="analysis-input" placeholder="Paste ciphertext to calculate IC and estimate key length..." spellcheck="false"></textarea>
+                    <div class="ioc-results" id="ioc-results"></div>
+                </div>
+
+                <!-- Vigenere Key Length Analysis -->
+                <div class="analysis-card" id="kasiski-card">
+                    <div class="card-header">
+                        <h3>📏 Kasiski Examination</h3>
+                        <button id="run-kasiski-btn" class="run-btn">Examine</button>
+                    </div>
+                    <textarea id="kasiski-input" class="analysis-input" placeholder="Paste Vigenère ciphertext to estimate key length via Kasiski method..." spellcheck="false"></textarea>
+                    <div class="kasiski-results" id="kasiski-results"></div>
+                </div>
+
+                <!-- Text Statistics -->
+                <div class="analysis-card" id="stats-card">
+                    <div class="card-header">
+                        <h3>📈 Text Statistics</h3>
+                        <button id="run-stats-btn" class="run-btn">Calculate</button>
+                    </div>
+                    <textarea id="stats-input" class="analysis-input" placeholder="Paste text to get detailed statistics..." spellcheck="false"></textarea>
+                    <div class="stats-results" id="stats-results"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== HASH SECTION ==================== -->
+        <section id="section-hash" class="section">
+            <div class="hash-workbench">
+                <div class="hash-input-area">
+                    <div class="panel-header">
+                        <h3><span class="header-dot hash"></span>Input Text</h3>
+                        <div class="hash-mode-toggle">
+                            <button id="hash-text-mode" class="mode-btn active">Text</button>
+                            <button id="hash-hex-mode" class="mode-btn">Hex Input</button>
+                        </div>
+                    </div>
+                    <textarea id="hash-input" placeholder="Enter text to hash..." spellcheck="false"></textarea>
+                    <button id="hash-all-btn" class="process-btn hash-process">
+                        <span class="process-text">GENERATE ALL HASHES</span>
+                        <span class="process-icon">🔑</span>
+                    </button>
+                </div>
+                <div class="hash-results-area" id="hash-results-area">
+                    <div class="hash-result-card" id="hash-md5">
+                        <div class="hash-label">MD5 <span class="hash-bits">128-bit</span></div>
+                        <div class="hash-value" id="hash-md5-value">—</div>
+                        <button class="hash-copy-btn" data-hash="md5">Copy</button>
+                    </div>
+                    <div class="hash-result-card" id="hash-sha1">
+                        <div class="hash-label">SHA-1 <span class="hash-bits">160-bit</span></div>
+                        <div class="hash-value" id="hash-sha1-value">—</div>
+                        <button class="hash-copy-btn" data-hash="sha1">Copy</button>
+                    </div>
+                    <div class="hash-result-card" id="hash-sha256">
+                        <div class="hash-label">SHA-256 <span class="hash-bits">256-bit</span></div>
+                        <div class="hash-value" id="hash-sha256-value">—</div>
+                        <button class="hash-copy-btn" data-hash="sha256">Copy</button>
+                    </div>
+                    <div class="hash-result-card" id="hash-sha384">
+                        <div class="hash-label">SHA-384 <span class="hash-bits">384-bit</span></div>
+                        <div class="hash-value" id="hash-sha384-value">—</div>
+                        <button class="hash-copy-btn" data-hash="sha384">Copy</button>
+                    </div>
+                    <div class="hash-result-card" id="hash-sha512">
+                        <div class="hash-label">SHA-512 <span class="hash-bits">512-bit</span></div>
+                        <div class="hash-value" id="hash-sha512-value">—</div>
+                        <button class="hash-copy-btn" data-hash="sha512">Copy</button>
+                    </div>
+                    <div class="hash-result-card" id="hash-crc32">
+                        <div class="hash-label">CRC-32 <span class="hash-bits">32-bit</span></div>
+                        <div class="hash-value" id="hash-crc32-value">—</div>
+                        <button class="hash-copy-btn" data-hash="crc32">Copy</button>
+                    </div>
+                </div>
+                <!-- Hash Comparison -->
+                <div class="hash-compare" id="hash-compare">
+                    <div class="panel-header">
+                        <h3><span class="header-dot compare"></span>Hash Comparison</h3>
+                    </div>
+                    <div class="compare-inputs">
+                        <input type="text" id="compare-hash1" placeholder="Enter first hash..." spellcheck="false">
+                        <input type="text" id="compare-hash2" placeholder="Enter second hash..." spellcheck="false">
+                    </div>
+                    <button id="compare-btn" class="run-btn">Compare</button>
+                    <div class="compare-result" id="compare-result"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== HISTORY SECTION ==================== -->
+        <section id="section-history" class="section">
+            <div class="history-header">
+                <h2>📜 Operation History</h2>
+                <div class="history-actions">
+                    <button id="export-history-btn" class="run-btn">Export JSON</button>
+                    <button id="clear-history-btn" class="run-btn danger">Clear All</button>
+                </div>
+            </div>
+            <div class="history-list" id="history-list">
+                <div class="history-empty">
+                    <span class="empty-icon">🕐</span>
+                    <p>No operations yet. Start encrypting or decrypting to build your history.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="ciphers.js"></script>
+    <script src="analysis.js"></script>
+    <script src="hashing.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
