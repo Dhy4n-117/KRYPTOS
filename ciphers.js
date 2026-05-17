@@ -1,4 +1,4 @@
-// ===== DECIPHER — Cipher Engine =====
+// ===== KRYPTOS — Cipher Engine =====
 const CipherEngine = {
   algorithms: {
     classic: [

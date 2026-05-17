@@ -1,4 +1,4 @@
-// ===== DECIPHER — Hashing Engine =====
+// ===== KRYPTOS — Hashing Engine =====
 const HashEngine = {
   async hashAll(text) {
     const encoder = new TextEncoder();

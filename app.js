@@ -1,4 +1,4 @@
-// ===== DECIPHER — Main Application =====
+// ===== KRYPTOS — Main Application =====
 (function() {
   'use strict';
 
@@ -6,7 +6,7 @@
   let currentCategory = 'classic';
   let currentAlgo = 'caesar';
   let isEncrypt = true;
-  let history = JSON.parse(localStorage.getItem('decipher_history') || '[]');
+  let history = JSON.parse(localStorage.getItem('kryptos_history') || '[]');
   let matrixEnabled = true;
 
   // DOM refs
@@ -225,7 +225,7 @@
     const blob = new Blob([outputText.value], { type: 'text/plain' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `decipher_${currentAlgo}_${Date.now()}.txt`;
+    a.download = `kryptos_${currentAlgo}_${Date.now()}.txt`;
     a.click();
   });
 
@@ -248,7 +248,7 @@
   function addHistory(algo, direction, input, output, key) {
     history.unshift({ algo, direction, input: input.substring(0, 200), output: output.substring(0, 200), key, time: new Date().toISOString() });
     if (history.length > 100) history.pop();
-    localStorage.setItem('decipher_history', JSON.stringify(history));
+    localStorage.setItem('kryptos_history', JSON.stringify(history));
     renderHistory();
   }
 
@@ -284,7 +284,7 @@
 
   $('clear-history-btn')?.addEventListener('click', () => {
     history = [];
-    localStorage.setItem('decipher_history', '[]');
+    localStorage.setItem('kryptos_history', '[]');
     renderHistory();
     showToast('History cleared', 'info');
   });
@@ -293,7 +293,7 @@
     const blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `decipher_history_${Date.now()}.json`;
+    a.download = `kryptos_history_${Date.now()}.json`;
     a.click();
   });
 
