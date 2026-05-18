@@ -69,7 +69,14 @@
       btn.classList.add('active');
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       $('section-' + btn.dataset.section).classList.add('active');
+      // Auto-close mobile menu
+      document.querySelector('.header-nav')?.classList.remove('mobile-open');
     });
+  });
+
+  // Mobile hamburger toggle
+  $('mobile-menu-btn')?.addEventListener('click', () => {
+    document.querySelector('.header-nav')?.classList.toggle('mobile-open');
   });
 
   // ===== CIPHER CATEGORIES =====
