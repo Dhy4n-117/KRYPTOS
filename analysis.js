@@ -130,6 +130,19 @@ const AnalysisEngine = {
   autoDetect(text) {
     const results = [];
     const trimmed = text.trim();
+    // Hash fingerprint detection
+    if (/^[0-9a-fA-F]+$/.test(trimmed)) {
+      const hashTypes = {
+        32: 'MD5 (128-bit)',
+        40: 'SHA-1 (160-bit)',
+        64: 'SHA-256 (256-bit)',
+        96: 'SHA-384 (384-bit)',
+        128: 'SHA-512 (512-bit)',
+      };
+      if (hashTypes[trimmed.length]) {
+        results.push({ type: `Hash: ${hashTypes[trimmed.length]}`, confidence: 'high', decoded: `This appears to be a ${hashTypes[trimmed.length]} hash digest. Hashes are one-way functions and cannot be decrypted — only cracked via brute-force or rainbow tables.` });
+      }
+    }
     // Base64
     if (/^[A-Za-z0-9+/]+=*$/.test(trimmed) && trimmed.length >= 4 && trimmed.length % 4 <= 1) {
       try { const d=atob(trimmed); if(/^[\x20-\x7E\n\r\t]+$/.test(d)) results.push({type:'Base64',confidence:'high',decoded:d}); }catch(e){}
