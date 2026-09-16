@@ -37,6 +37,7 @@ const CipherEngine = {
       {id:'tap',name:'Tap Code',desc:'Polybius variant used by prisoners.',security:'None',type:'Encoding',keyLabel:'None'},
       {id:'pigpen',name:'Pigpen Text',desc:'Text representation of the Pigpen cipher.',security:'None',type:'Substitution',keyLabel:'None'},
       {id:'nato',name:'NATO Phonetic',desc:'NATO phonetic alphabet encoding.',security:'None',type:'Encoding',keyLabel:'None'},
+      {id:'zwc',name:'Zero-Width Steg',desc:'Hides secret text invisibly within cover text.',security:'Medium',type:'Steganographic',keyLabel:'Cover Text'},
     ]
   },
 
@@ -74,6 +75,7 @@ const CipherEngine = {
         case 'tap': return encrypt ? this.tapEncode(text) : this.tapDecode(text);
         case 'pigpen': return encrypt ? this.pigpenEncode(text) : this.pigpenDecode(text);
         case 'nato': return encrypt ? this.natoEncode(text) : this.natoDecode(text);
+        case 'zwc': return encrypt ? this.zwcEncode(text, key||'This is normal text.') : this.zwcDecode(text);
         default: return 'Unknown algorithm';
       }
     } catch(e) { return 'Error: ' + e.message; }
@@ -322,4 +324,32 @@ const CipherEngine = {
     const rev = {}; for (const [k,v] of Object.entries(this.natoMap)) rev[v.toUpperCase()] = k;
     return t.split(/\s+/).map(w => w==='/'?' ' : rev[w.toUpperCase()]||w).join('');
   },
+
+  zwcEncode(secretText, coverText) {
+    let binary = '';
+    for (let i = 0; i < secretText.length; i++) {
+      binary += secretText.charCodeAt(i).toString(2).padStart(8, '0') + ' ';
+    }
+    const hidden = binary.trim().split('').map(bit => {
+      if (bit === '0') return '\u200B'; // Zero-width space
+      if (bit === '1') return '\u200C'; // Zero-width non-joiner
+      if (bit === ' ') return '\u200D'; // Zero-width joiner (separator)
+      return '';
+    }).join('');
+    
+    // Insert the hidden string in the middle of the cover text
+    const mid = Math.floor(coverText.length / 2);
+    return coverText.substring(0, mid) + hidden + coverText.substring(mid);
+  },
+  
+  zwcDecode(t) {
+    let binary = '';
+    for (let i = 0; i < t.length; i++) {
+      if (t[i] === '\u200B') binary += '0';
+      else if (t[i] === '\u200C') binary += '1';
+      else if (t[i] === '\u200D') binary += ' ';
+    }
+    if (!binary) return 'No hidden message found.';
+    return binary.trim().split(' ').map(b => String.fromCharCode(parseInt(b, 2))).join('');
+  }
 };
