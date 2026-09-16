@@ -172,14 +172,43 @@
     if (!text) { showToast('Enter some text first', 'error'); return; }
     const key = document.getElementById('cipher-key')?.value || '';
     const result = CipherEngine.process(currentAlgo, text, key, isEncrypt);
-    outputText.value = result;
-    updateCounts();
+    glitchTextAnimation(result, outputText, () => {
+      updateCounts();
+    });
     // Animate
     $('process-btn').style.transform = 'scale(0.95)';
     setTimeout(() => $('process-btn').style.transform = '', 150);
     // Add to history
     addHistory(currentAlgo, isEncrypt ? 'encrypt' : 'decrypt', text, result, key);
     showToast(isEncrypt ? 'Encrypted!' : 'Decrypted!', 'success');
+  }
+
+  // ===== GLITCH EFFECT =====
+  function glitchTextAnimation(finalText, element, callback) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+    let iterations = 0;
+    const maxIterations = Math.min(20, Math.floor(finalText.length / 2) + 10);
+    
+    // Disable input temporarily
+    element.disabled = true;
+    
+    const interval = setInterval(() => {
+      element.value = finalText.split('').map((char, index) => {
+        if (index < iterations) {
+          return finalText[index];
+        }
+        return chars[Math.floor(Math.random() * chars.length)];
+      }).join('');
+      
+      iterations += finalText.length / maxIterations;
+      
+      if (iterations >= finalText.length) {
+        clearInterval(interval);
+        element.value = finalText;
+        element.disabled = false;
+        if (callback) callback();
+      }
+    }, 30);
   }
 
   // Enter key shortcut
