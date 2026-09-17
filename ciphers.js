@@ -9,9 +9,10 @@ const CipherEngine = {
       {id:'playfair',name:'Playfair',desc:'Digraph cipher using a 5×5 key matrix.',security:'Medium',type:'Polygraphic',keyLabel:'Keyword'},
       {id:'railfence',name:'Rail Fence',desc:'Transposition cipher writing in zigzag.',security:'Low',type:'Transposition',keyLabel:'Rails'},
       {id:'columnar',name:'Columnar',desc:'Transposition cipher using column order.',security:'Low',type:'Transposition',keyLabel:'Keyword'},
-      {id:'affine',name:'Affine',desc:'ax+b mod 26 mathematical cipher.',security:'Low',type:'Substitution',keyLabel:'a, b'},
-      {id:'beaufort',name:'Beaufort',desc:'Reciprocal variant of Vigenère.',security:'Medium',type:'Polyalphabetic',keyLabel:'Keyword'},
-      {id:'substitution',name:'Substitution',desc:'Map each letter to another via a key alphabet.',security:'Low',type:'Substitution',keyLabel:'Alphabet Key'},
+      {id:'affine',name:'Affine',desc:'Linear substitution (ax + b) mod 26.',security:'Low',type:'Substitution',keyLabel:'a,b'},
+      {id:'beaufort',name:'Beaufort',desc:'Similar to Vigenère, but using C = K - P mod 26.',security:'Medium',type:'Substitution',keyLabel:'Key word'},
+      {id:'substitution',name:'Substitution',desc:'Replaces each letter with another based on a mixed alphabet key.',security:'Medium',type:'Substitution',keyLabel:'Alphabet (26 chars)'},
+      {id:'bifid',name:'Bifid',desc:'Fractional substitution using a Polybius square and transposition.',security:'Medium',type:'Fractional',keyLabel:'Key word'},
     ],
     encoding: [
       {id:'base64',name:'Base64',desc:'Binary-to-text encoding scheme.',security:'None',type:'Encoding',keyLabel:'None'},
@@ -56,6 +57,7 @@ const CipherEngine = {
         case 'affine': return this.affine(text, key||'5,8', encrypt);
         case 'beaufort': return this.beaufort(text, key||'KEY');
         case 'substitution': return this.substitutionCipher(text, key||'ZYXWVUTSRQPONMLKJIHGFEDCBA', encrypt);
+        case 'bifid': return encrypt ? this.bifidEncode(text, key||'KEYWORD') : this.bifidDecode(text, key||'KEYWORD');
         case 'base64': return encrypt ? btoa(unescape(encodeURIComponent(text))) : decodeURIComponent(escape(atob(text)));
         case 'base32': return encrypt ? this.base32Encode(text) : this.base32Decode(text);
         case 'hex': return encrypt ? this.toHex(text) : this.fromHex(text);
@@ -159,6 +161,53 @@ const CipherEngine = {
       if (ca === cb) return at((ra+dir)%5,ca) + at((rb+dir)%5,cb);
       return at(ra,cb) + at(rb,ca);
     }).join(' ');
+  },
+
+  bifidEncode(text, key) {
+    const matrix = [];
+    const seen = new Set();
+    const cleanKey = key.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+    for (const c of cleanKey + 'ABCDEFGHIKLMNOPQRSTUVWXYZ') {
+      if (!seen.has(c)) { seen.add(c); matrix.push(c); }
+    }
+    const pos = c => { const i = matrix.indexOf(c); return [Math.floor(i/5), i%5]; };
+    const at = (r,c) => matrix[r*5+c];
+    const clean = text.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+    const row = [], col = [];
+    for (const c of clean) {
+      const [r, cPos] = pos(c);
+      row.push(r);
+      col.push(cPos);
+    }
+    const combined = row.concat(col);
+    let result = '';
+    for (let i = 0; i < combined.length; i += 2) {
+      result += at(combined[i], combined[i+1]);
+    }
+    return result;
+  },
+
+  bifidDecode(text, key) {
+    const matrix = [];
+    const seen = new Set();
+    const cleanKey = key.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+    for (const c of cleanKey + 'ABCDEFGHIKLMNOPQRSTUVWXYZ') {
+      if (!seen.has(c)) { seen.add(c); matrix.push(c); }
+    }
+    const pos = c => { const i = matrix.indexOf(c); return [Math.floor(i/5), i%5]; };
+    const at = (r,c) => matrix[r*5+c];
+    const clean = text.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+    const combined = [];
+    for (const c of clean) {
+      const [r, cPos] = pos(c);
+      combined.push(r, cPos);
+    }
+    const mid = Math.floor(combined.length / 2);
+    let result = '';
+    for (let i = 0; i < mid; i++) {
+      result += at(combined[i], combined[mid + i]);
+    }
+    return result;
   },
 
   railfence(text, rails, encrypt) {
