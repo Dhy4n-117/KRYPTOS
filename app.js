@@ -242,6 +242,31 @@
     updateCounts();
   });
 
+  // ===== DRAG AND DROP =====
+  const inputPanel = $('input-panel');
+  inputPanel.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    inputPanel.classList.add('drag-over');
+  });
+  inputPanel.addEventListener('dragleave', () => {
+    inputPanel.classList.remove('drag-over');
+  });
+  inputPanel.addEventListener('drop', (e) => {
+    e.preventDefault();
+    inputPanel.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        inputText.value = e.target.result;
+        updateCounts();
+        showToast('File loaded successfully', 'success');
+      };
+      reader.onerror = () => showToast('Error reading file', 'error');
+      reader.readAsText(file);
+    }
+  });
+
   // ===== SAMPLE TEXT =====
   $('sample-btn').addEventListener('click', () => {
     const samples = [

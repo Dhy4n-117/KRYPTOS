@@ -116,7 +116,7 @@
 
             <!-- Main Workbench -->
             <div class="workbench">
-                <div class="workbench-panel input-panel">
+                <div class="workbench-panel input-panel" id="input-panel">
                     <div class="panel-header">
                         <h3><span class="header-dot"></span>Input</h3>
                         <div class="panel-actions">
@@ -125,7 +125,8 @@
                             <span class="char-count" id="input-char-count">0 chars</span>
                         </div>
                     </div>
-                    <textarea id="input-text" placeholder="Enter text to encrypt or decrypt..." spellcheck="false"></textarea>
+                    <textarea id="input-text" placeholder="Enter text to encrypt or decrypt... (or drag & drop a .txt file)" spellcheck="false"></textarea>
+                    <div id="drop-overlay" class="drop-overlay">Drop file here</div>
                 </div>
 
                 <!-- Controls Strip -->
