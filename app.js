@@ -229,6 +229,64 @@
   }
   inputText.addEventListener('input', updateCounts);
 
+  // ===== MORSE PLAYBACK =====
+  let audioCtx = null;
+  $('play-btn').addEventListener('click', async () => {
+    const text = outputText.value.trim();
+    if (!text) return;
+    
+    // Check if it looks like Morse
+    if (!/^[.\-/ \n]+$/.test(text)) {
+      showToast('Output must be Morse code (. and -) to play', 'error');
+      return;
+    }
+    
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Reset any previous play state
+    $('play-btn').textContent = '⏹️';
+    
+    const dotLen = 0.08; // 80ms
+    let time = audioCtx.currentTime;
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 600; // 600 Hz tone
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    gain.gain.setValueAtTime(0, time);
+    
+    for (const char of text) {
+      if (char === '.') {
+        gain.gain.setValueAtTime(1, time);
+        time += dotLen;
+        gain.gain.setValueAtTime(0, time);
+        time += dotLen; // space between parts
+      } else if (char === '-') {
+        gain.gain.setValueAtTime(1, time);
+        time += dotLen * 3;
+        gain.gain.setValueAtTime(0, time);
+        time += dotLen; // space between parts
+      } else if (char === ' ') {
+        time += dotLen * 2; // space between letters (1 dot is already added after previous part, so +2 = 3)
+      } else if (char === '/') {
+        time += dotLen * 6; // space between words (1 dot is already added, so +6 = 7)
+      }
+    }
+    
+    osc.start(audioCtx.currentTime);
+    osc.stop(time);
+    
+    osc.onended = () => {
+      $('play-btn').textContent = '🔊';
+    };
+    
+    showToast('Playing Morse code...', 'info');
+  });
+
   // ===== CLIPBOARD =====
   $('copy-btn').addEventListener('click', () => {
     if (outputText.value) {
