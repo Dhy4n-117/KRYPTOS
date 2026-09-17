@@ -528,6 +528,7 @@
     $('bf-progress-percent').textContent = '0%';
     $('bf-progress-label').textContent = 'Initializing...';
     $('bf-results-header').style.display = 'none';
+    $('bf-download-btn').style.display = 'none';
     $('bf-results').innerHTML = '<div class="history-empty"><span class="empty-icon">⏳</span><p>Running attack...</p></div>';
 
     // Disable launch button
@@ -581,11 +582,13 @@
 
     if (!bfResults.length) {
       header.style.display = 'none';
+      $('bf-download-btn').style.display = 'none';
       container.innerHTML = '<div class="history-empty"><span class="empty-icon">🚫</span><p>No plausible decryptions found. The ciphertext may use an unknown key or unsupported algorithm.</p></div>';
       return;
     }
 
     header.style.display = 'flex';
+    $('bf-download-btn').style.display = 'flex';
     $('bf-results-count').textContent = bfResults.length + ' candidate' + (bfResults.length !== 1 ? 's' : '');
 
     container.innerHTML = bfResults.map((r, i) => {
@@ -632,6 +635,17 @@
     $('section-cipher').classList.add('active');
 
     showToast('Loaded into Cipher workbench', 'success');
+  });
+
+  // Brute Force JSON Download
+  $('bf-download-btn')?.addEventListener('click', () => {
+    if (!bfResults || bfResults.length === 0) return;
+    const blob = new Blob([JSON.stringify(bfResults, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `kryptos_bruteforce_${Date.now()}.json`;
+    a.click();
+    showToast('Downloaded Brute Force results', 'success');
   });
 
   // ===== INIT =====
